@@ -35,7 +35,7 @@ var serversMenuBarItem = new MenuBarItem("_Servers", new List<MenuItem[]>());
 var directMessagesMenuBarItem = new MenuBarItem("_Direct Messages", new List<MenuItem[]>());
 var menu = new MenuBar(new[]
 {
-    new("_File", new MenuItem[]
+    new("_App", new MenuItem[]
     {
         new("API Info", "", () =>
         {
