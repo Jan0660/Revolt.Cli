@@ -9,8 +9,6 @@ namespace Revolt.Cli
     {
         public static void SizeFix(this Window view, View parent)
         {
-            // view.Width = SysCon.WindowWidth;
-            // view.Height = SysCon.WindowHeight - 1;
             view.Width = parent.Width;
             view.Height = parent.Height - 1;
             Task.Delay(100).ContinueWith(_ =>

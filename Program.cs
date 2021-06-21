@@ -10,8 +10,9 @@ using Revolt;
 using Revolt.Channels;
 using Revolt.Cli;
 
+string GetVersion()
+    => typeof(ExtensionMethods).Assembly.GetName().Version.ToString();
 RevoltClient client = null;
-
 Application.Init();
 var top = Application.Top;
 
@@ -31,18 +32,21 @@ top.Add(win);
 // Creates a menubar, the item "New" has a help menu.
 var groupsMenuBarItem = new MenuBarItem("_Groups", new List<MenuItem[]>());
 var serversMenuBarItem = new MenuBarItem("_Servers", new List<MenuItem[]>());
-var menu = new MenuBar(new MenuBarItem[]
+var directMessagesMenuBarItem = new MenuBarItem("_Direct Messages", new List<MenuItem[]>());
+var menu = new MenuBar(new[]
 {
-    new MenuBarItem("_File", new MenuItem[]
+    new("_File", new MenuItem[]
     {
-        new MenuItem("API Info", "", () =>
+        new("API Info", "", () =>
         {
             var info = client.ApiInfo;
             var vortex = client.GetVortexInfo();
             var autumn = client.GetAutumnInfo();
+
             // todo: ansi
             string StrBool(bool b)
                 => b ? "true" : "false";
+
             MessageBox.Query("Revolt API Info", $@"Versions
 Api: {info.Version}
 Vortex: {vortex.Version}
@@ -54,12 +58,23 @@ Email: {StrBool(info.Features.Email)}
 Captcha: {StrBool(info.Features.Captcha.Enabled)}
 Max Attachment Size: {autumn.Tags.Attachments.MaxSize / 1000 / 1000}MB", "Ok");
         }),
-        new MenuItem("_Quit", "", () =>
+        new("_Reconnect", "", () =>
+        {
+            client.DisconnectWebsocket();
+            client.ConnectWebSocketAsync();
+        }),
+        new("_About", "", () =>
+        {
+            MessageBox.Query("Revolt.Cli", $@"Developed by Jan0660
+Version {GetVersion()}
+Source: https://github.com/Jan0660/Revolt.Cli", "Ok");
+        }),
+        new("_Quit", "", () =>
         {
             if (Quit()) top.Running = false;
-        })
+        }),
     }),
-    groupsMenuBarItem, serversMenuBarItem,
+    groupsMenuBarItem, serversMenuBarItem, directMessagesMenuBarItem,
 });
 top.Add(menu);
 
@@ -73,8 +88,9 @@ void ChannelLogic(Channel channel)
 {
     var groupChannel = channel as GroupChannel;
     var textChannel = channel as TextChannel;
+    var dmChannel = channel as DirectMessageChannel;
     top.RemoveAll();
-    var newWin = new Window(groupChannel?.Name ?? textChannel?.Name)
+    var newWin = new Window(groupChannel?.Name ?? textChannel?.Name ?? dmChannel?.OtherUser.Username)
     {
         X = 0,
         Y = 1,
@@ -145,16 +161,23 @@ void ChannelLogic(Channel channel)
 
 void MainView()
 {
-    client = new(JsonConvert.DeserializeObject<Session>(File.ReadAllText("session.json"))!);
+    client = new(JsonConvert.DeserializeObject<Session>(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/session.json"))!);
     client.OnReady += async () =>
     {
         try
         {
             var groupsMenuItems = new List<MenuItem>();
             var serversMenuItems = new List<MenuItem>();
+            var dmMenuItems = new List<MenuItem>();
             foreach (var channel in client.ChannelsCache)
+            {
                 if (channel is GroupChannel groupChannel)
                     groupsMenuItems.Add(new MenuItem(groupChannel.Name, "", () => ChannelLogic(groupChannel)));
+                if (channel is DirectMessageChannel dmChannel)
+                    dmMenuItems.Add(new MenuItem(dmChannel.OtherUser.Username, "",
+                        () => ChannelLogic(dmChannel)));
+            }
+
             foreach (var server in client.ServersCache)
             {
                 var children = new List<MenuItem>();
@@ -173,6 +196,7 @@ void MainView()
 
             groupsMenuBarItem.Children = groupsMenuItems.ToArray();
             serversMenuBarItem.Children = serversMenuItems.ToArray();
+            directMessagesMenuBarItem.Children = dmMenuItems.ToArray();
         }
         catch (Exception exc)
         {
@@ -212,7 +236,7 @@ void LogInView()
         Secret = true,
         X = Pos.Left(sessionIdField),
         Y = Pos.Top(sessionTokenLabel),
-        Width = Dim.Width(sessionIdField)
+        Width = 70
     };
     var logInbutton = new Button("Log In")
     {
@@ -222,11 +246,11 @@ void LogInView()
     logInbutton.Clicked += () =>
     {
         win.RemoveAll();
-        File.WriteAllText("session.json", JsonConvert.SerializeObject(new Session()
+        File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/session.json", JsonConvert.SerializeObject(new Session()
         {
-            UserId = userIdField.Text.ToString(),
+            UserId = userIdField.Text.ToString()!,
             Id = sessionIdField.Text.ToString(),
-            SessionToken = sessionTokenField.Text.ToString(),
+            SessionToken = sessionTokenField.Text.ToString()!,
         }));
         MainView();
     };
@@ -234,12 +258,12 @@ void LogInView()
     win.Add(
         // The ones with my favorite layout system, Computed
         userIdLabel, sessionIdLabel, sessionTokenLabel, userIdField, sessionIdField, sessionTokenField,
-        logInbutton,
-        new Label(3, 18, "Press F9 or ESC plus 9 to activate the menubar")
+        logInbutton
+        // new Label(3, 18, "Press F9 or ESC plus 9 to activate the menubar")
     );
 }
 
-if (!File.Exists("session.json"))
+if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/session.json"))
     LogInView();
 else
     MainView();

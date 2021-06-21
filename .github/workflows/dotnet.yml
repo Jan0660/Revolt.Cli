@@ -1,0 +1,53 @@
+name: Build artifacts for release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: git submodules
+      run: git submodule update --init
+    - name: build windows
+      run: dotnet publish -r win-x64 -c release -o ./bin/windows-x64  -p:PublishSingleFile=true --self-contained false || true
+    - name: build linux
+      run: dotnet publish -r linux-x64 -c release -o ./bin/linux-x64  -p:PublishSingleFile=true --self-contained false || true
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+        draft: true
+        prerelease: false
+    - name: upload linux artifact
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/linux-x64/Revolt.Cli
+        asset_name: linux-x64.revolt-cli
+        asset_content_type: application/octet-stream
+      uses: actions/upload-release-asset@v1
+    - name: upload windows artifact
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/windows-x64/Revolt.Cli.exe
+        asset_name: win-x64.revolt-cli.exe
+        asset_content_type: application/octet-stream
+      uses: actions/upload-release-asset@v1
