@@ -12,7 +12,10 @@ using Revolt.Cli;
 
 string GetVersion()
     => typeof(ExtensionMethods).Assembly.GetName().Version.ToString();
+
 RevoltClient client = null;
+if (!OperatingSystem.IsWindows())
+    Application.UseSystemConsole = true;
 Application.Init();
 var top = Application.Top;
 
@@ -161,7 +164,8 @@ void ChannelLogic(Channel channel)
 
 void MainView()
 {
-    client = new(JsonConvert.DeserializeObject<Session>(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/session.json"))!);
+    client = new(JsonConvert.DeserializeObject<Session>(
+        File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/session.json"))!);
     client.OnReady += async () =>
     {
         try
@@ -183,7 +187,7 @@ void MainView()
                 var children = new List<MenuItem>();
                 foreach (var channelId in server.ChannelIds)
                 {
-                    var channel = (TextChannel)client.ChannelsCache.First(c => c._id == channelId);
+                    var channel = (TextChannel) client.ChannelsCache.First(c => c._id == channelId);
                     children.Add(new(channel.Name, "", () => ChannelLogic(channel)));
                 }
 
@@ -207,7 +211,7 @@ void MainView()
 
 void LogInView()
 {
-    var userIdLabel = new Label("User Id: ") { X = 3, Y = 2 };
+    var userIdLabel = new Label("User Id: ") {X = 3, Y = 2};
     var sessionIdLabel = new Label("Session Id: ")
     {
         X = Pos.Left(userIdLabel),
@@ -246,12 +250,13 @@ void LogInView()
     logInbutton.Clicked += () =>
     {
         win.RemoveAll();
-        File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/session.json", JsonConvert.SerializeObject(new Session()
-        {
-            UserId = userIdField.Text.ToString()!,
-            Id = sessionIdField.Text.ToString(),
-            SessionToken = sessionTokenField.Text.ToString()!,
-        }));
+        File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/session.json",
+            JsonConvert.SerializeObject(new Session()
+            {
+                UserId = userIdField.Text.ToString()!,
+                Id = sessionIdField.Text.ToString(),
+                SessionToken = sessionTokenField.Text.ToString()!,
+            }));
         MainView();
     };
 // Add some controls, 
