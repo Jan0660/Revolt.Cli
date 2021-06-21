@@ -11,7 +11,7 @@ using Revolt.Channels;
 using Revolt.Cli;
 
 string GetVersion()
-    => typeof(ExtensionMethods).Assembly.GetName().Version.ToString();
+    => typeof(ExtensionMethods).Assembly.GetName().Version!.ToString();
 
 RevoltClient client = null;
 if (!OperatingSystem.IsWindows())
@@ -74,7 +74,10 @@ Source: https://github.com/Jan0660/Revolt.Cli", "Ok");
         }),
         new("_Quit", "", () =>
         {
-            if (Quit()) top.Running = false;
+            if (Quit())
+            {
+                top.Running = false;
+            }
         }),
     }),
     groupsMenuBarItem, serversMenuBarItem, directMessagesMenuBarItem,
@@ -274,3 +277,5 @@ else
     MainView();
 Task.Delay(100).ContinueWith((_) => { Application.Refresh(); });
 Application.Run();
+if (OperatingSystem.IsLinux())
+    System.Diagnostics.Process.Start("reset");
