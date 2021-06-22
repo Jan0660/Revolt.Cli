@@ -9,37 +9,35 @@ namespace Revolt.Cli.Windows
     {
         public HomeWindow()
         {
-            var groupsMenuItems = new List<MenuItem>();
-            var serversMenuItems = new List<MenuItem>();
-            var dmMenuItems = new List<MenuItem>();
-            foreach (var channel in App.Client.ChannelsCache)
+            Title = "Revolt.Cli - Home";
+            Add(new Label(1, 1, $"Welcome to Revolt.Cli, {App.Client.Users.Get(App.Client.Self.UserId).Username}."));
+            Add(new Label(1, 3, $"Online Friends"));
+            List<View> onlineFriends = new();
+            var widestName = 0;
+            for (var i = 0; i < App.Client.UsersCache.Count; i++)
             {
-                if (channel is GroupChannel groupChannel)
-                    groupsMenuItems.Add(new MenuItem(groupChannel.Name, "", () => new ChannelWindow(channel).Show()));
-                if (channel is DirectMessageChannel dmChannel)
-                    dmMenuItems.Add(new MenuItem(dmChannel.OtherUser.Username, "",
-                        () => new ChannelWindow(channel).Show()));
-            }
-
-            foreach (var server in App.Client.ServersCache)
-            {
-                var children = new List<MenuItem>();
-                foreach (var channelId in server.ChannelIds)
+                var user = App.Client.UsersCache[i];
+                if (user.Relationship == RelationshipStatus.Friend && user?.Status?.Presence == "Online")
                 {
-                    var channel = (TextChannel)App.Client.ChannelsCache.First(c => c._id == channelId);
-                    children.Add(new(channel.Name, "", () => new ChannelWindow(channel).Show()));
+                    // todo: open dm or create one and open it
+                    var button = new Label(0, onlineFriends.Count, user.Username);
+                    onlineFriends.Add(button);
+                    if (user.Username.Length > widestName)
+                        widestName = user.Username.Length;
                 }
-
-                var menu = new MenuBarItem(server.Name, server.Description?.Shorten(30) ?? "", null)
-                {
-                    Children = children.ToArray()
-                };
-                serversMenuItems.Add(menu);
             }
 
-            App.GroupsMenuBarItem.Children = groupsMenuItems.ToArray();
-            App.ServersMenuBarItem.Children = serversMenuItems.ToArray();
-            App.DirectMessagesMenuBarItem.Children = dmMenuItems.ToArray();
+            var friendsList = new ScrollView()
+            {
+                ContentSize = new(widestName, onlineFriends.Count),
+                X = 3,
+                Y = 4,
+                Width = widestName + 2,
+                Height = Dim.Fill() - 3,
+            };
+            foreach (var h in onlineFriends)
+                friendsList.Add(h);
+            Add(friendsList);
         }
     }
 }

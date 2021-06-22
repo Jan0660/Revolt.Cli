@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Revolt.Channels;
 using Revolt.Cli.Windows;
 using Terminal.Gui;
 
@@ -16,6 +18,7 @@ namespace Revolt.Cli
         public static MenuBarItem GroupsMenuBarItem;
         public static MenuBarItem ServersMenuBarItem;
         public static MenuBarItem DirectMessagesMenuBarItem;
+        public static bool HasReadied;
 
         public static void Run()
         {
@@ -44,6 +47,7 @@ namespace Revolt.Cli
             {
                 new("_App", new MenuItem[]
                 {
+                    new("_Home", "", () => new HomeWindow().Show()),
                     new("API Info", "", () =>
                     {
                         var info = client.ApiInfo;
@@ -106,11 +110,46 @@ Source: https://github.com/Jan0660/Revolt.Cli", "Ok");
                 {
                     try
                     {
-                        new HomeWindow().Show();
+                        var groupsMenuItems = new List<MenuItem>();
+                        var serversMenuItems = new List<MenuItem>();
+                        var dmMenuItems = new List<MenuItem>();
+                        foreach (var channel in App.Client.ChannelsCache)
+                        {
+                            if (channel is GroupChannel groupChannel)
+                                groupsMenuItems.Add(new MenuItem(groupChannel.Name, "",
+                                    () => new ChannelWindow(channel).Show()));
+                            if (channel is DirectMessageChannel dmChannel)
+                                dmMenuItems.Add(new MenuItem(dmChannel.OtherUser.Username, "",
+                                    () => new ChannelWindow(channel).Show()));
+                        }
+
+                        foreach (var server in App.Client.ServersCache)
+                        {
+                            var children = new List<MenuItem>();
+                            foreach (var channelId in server.ChannelIds)
+                            {
+                                var channel = (TextChannel)App.Client.ChannelsCache.First(c => c._id == channelId);
+                                children.Add(new(channel.Name, "", () => new ChannelWindow(channel).Show()));
+                            }
+
+                            var menu = new MenuBarItem(server.Name, server.Description?.Shorten(30) ?? "", null)
+                            {
+                                Children = children.ToArray()
+                            };
+                            serversMenuItems.Add(menu);
+                        }
+
+                        App.GroupsMenuBarItem.Children = groupsMenuItems.ToArray();
+                        App.ServersMenuBarItem.Children = serversMenuItems.ToArray();
+                        App.DirectMessagesMenuBarItem.Children = dmMenuItems.ToArray();
+                        if (!HasReadied)
+                            new HomeWindow().Show();
                     }
                     catch (Exception exc)
                     {
                     }
+
+                    HasReadied = true;
                 };
                 client.ConnectWebSocketAsync();
             }
