@@ -17,8 +17,17 @@ namespace Revolt.Cli
                 view.Height = Dim.Fill();
             });
         }
+
         [Pure]
         public static string Shorten(this string str, int length)
             => str.Length > length ? str[..(length - 5)] + "(...)" : str;
+
+        public static void Show(this Window window)
+        {
+            App.Toplevel.RemoveAll();
+            window.SizeFix(App.Toplevel);
+            App.Toplevel.Add(window);
+            App.Toplevel.Add(App.MenuBar);
+        }
     }
 }
