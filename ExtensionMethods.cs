@@ -7,7 +7,7 @@ namespace Revolt.Cli
 {
     public static class ExtensionMethods
     {
-        public static void SizeFix(this Window view, View parent)
+        public static void SizeFix(this View view, View parent)
         {
             view.Width = parent.Width;
             view.Height = parent.Height - 1;
@@ -24,12 +24,19 @@ namespace Revolt.Cli
 
         private static View _lastShownView;
 
-        public static void Show(this Window window, bool hideLast = true)
+        public static void Show(this Window window, bool hideLast = true, bool sizeFix = true, View parent = null)
         {
-            window.SizeFix(App.Toplevel);
+            if(sizeFix)
+                window.SizeFix(App.Toplevel);
+            Show((View)window, hideLast, parent);
+        }
+
+        public static void Show(this View view, bool hideLast = true, View parent = null)
+        {
             if (_lastShownView != null && hideLast)
                 _lastShownView.Hide();
-            App.Toplevel.Add(window);
+            (parent ?? App.Toplevel).Add(view);
+            _lastShownView = view;
         }
 
         public static void Hide(this View view)

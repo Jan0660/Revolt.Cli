@@ -3,7 +3,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Terminal.Gui;
 
-namespace Revolt.Cli.Windows
+namespace Revolt.Cli.Views.Windows
 {
     public class LogInWindow : Window
     {

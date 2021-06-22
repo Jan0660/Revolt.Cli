@@ -4,7 +4,7 @@ using NStack;
 using Revolt.Channels;
 using Terminal.Gui;
 
-namespace Revolt.Cli.Windows
+namespace Revolt.Cli.Views.Windows
 {
     public class ChannelWindow : Window
     {
@@ -40,7 +40,14 @@ namespace Revolt.Cli.Windows
                             Height = 1,
                             Text = message.Author.Username
                         };
-                        userButton.Clicked += () => { MessageBox.Query(message.Author.Username, "hi", "Bye"); };
+                        userButton.Clicked += () =>
+                        {
+                            new MessageContextMenu(message)
+                                {
+                                    Y = Pos.Bottom(userButton),
+                                    X = userButton.X
+                                }.Show(false, false, messagesView);
+                        };
                         messagesView.Add(userButton);
                         messagesView.Add(new TextView
                         {

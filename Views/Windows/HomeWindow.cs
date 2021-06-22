@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using Revolt.Channels;
 using Terminal.Gui;
 
-namespace Revolt.Cli.Windows
+namespace Revolt.Cli.Views.Windows
 {
     public class HomeWindow : Window
     {

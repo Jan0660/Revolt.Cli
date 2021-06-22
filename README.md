@@ -6,6 +6,10 @@
 ## Install
 ### Arch Linux
 Install the [revolt-cli-bin](https://aur.archlinux.org/packages/revolt-cli-bin/) AUR package.
+### (Other) Linux
+Install the dependencies: [xsel](https://github.com/kfish/xsel)
+
+and continue as below.
 ### Other
 Grab yourself [the latest release](https://github.com/Jan0660/Revolt.Cli/releases).
 ## Usage

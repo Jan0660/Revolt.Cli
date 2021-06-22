@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Revolt.Channels;
-using Revolt.Cli.Windows;
+using Revolt.Cli.Views.Windows;
 using Terminal.Gui;
 
 namespace Revolt.Cli
