@@ -25,40 +25,46 @@ namespace Revolt.Cli.Views.Windows
                 ContentSize = new Size(2100, 1000)
             };
             var fuckImTired = 0;
+
+            void AddMessage(Message message)
+            {
+                var height = 1 + message.Content.Count(c => c == '\n');
+                var userButton = new Button()
+                {
+                    X = 0,
+                    Y = fuckImTired,
+                    Width = message.Author.Username.Length,
+                    Height = 1,
+                    Text = message.Author.Username
+                };
+                userButton.Clicked += () =>
+                {
+                    new MessageContextMenu(message)
+                    {
+                        Y = Pos.Bottom(userButton),
+                        X = userButton.X
+                    }.Show(false, false, messagesView);
+                };
+                messagesView.Add(userButton);
+                messagesView.Add(new TextView
+                {
+                    X = Pos.Right(userButton) + 1,
+                    Y = fuckImTired,
+                    Width = Dim.Fill(),
+                    Height = height,
+                    Text = message.Content,
+                    ReadOnly = true, CanFocus = false, Selecting = false
+                });
+                fuckImTired += height;
+            }
+
             channel.Client.MessageReceived += message =>
             {
                 Application.MainLoop.Invoke(() =>
                 {
                     if (message.ChannelId == channel._id)
                     {
-                        var height = 1 + message.Content.Count(c => c == '\n');
-                        var userButton = new Button()
-                        {
-                            X = 0,
-                            Y = fuckImTired,
-                            Width = message.Author.Username.Length,
-                            Height = 1,
-                            Text = message.Author.Username
-                        };
-                        userButton.Clicked += () =>
-                        {
-                            new MessageContextMenu(message)
-                                {
-                                    Y = Pos.Bottom(userButton),
-                                    X = userButton.X
-                                }.Show(false, false, messagesView);
-                        };
-                        messagesView.Add(userButton);
-                        messagesView.Add(new TextView
-                        {
-                            X = Pos.Right(userButton) + 1,
-                            Y = fuckImTired,
-                            Width = Dim.Fill(),
-                            Height = height,
-                            Text = message.Content,
-                            ReadOnly = true, CanFocus = false, Selecting = false
-                        });
-                        fuckImTired += height;
+                        AddMessage(message);
                     }
                 });
                 return Task.CompletedTask;
@@ -82,6 +88,14 @@ namespace Revolt.Cli.Views.Windows
             };
             this.Add(messageField);
             messageField.SetFocus();
+            App.Client.Channels.GetMessagesAsync(channel._id, 5).ContinueWith(val =>
+            {
+                Application.MainLoop.Invoke(() =>
+                {
+                    foreach (var message in val.Result.Reverse())
+                        AddMessage(message);
+                });
+            });
         }
     }
 }
