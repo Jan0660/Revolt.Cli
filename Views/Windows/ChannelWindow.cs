@@ -92,8 +92,15 @@ namespace Revolt.Cli.Views.Windows
             {
                 Application.MainLoop.Invoke(() =>
                 {
-                    foreach (var message in val.Result.Reverse())
-                        AddMessage(message);
+                    try
+                    {
+                        foreach (var message in val.Result.Reverse())
+                            AddMessage(message);
+                    }
+                    catch
+                    {
+                        // CBA to handle system messages rn
+                    }
                 });
             });
         }

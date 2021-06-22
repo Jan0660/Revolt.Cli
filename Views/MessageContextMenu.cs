@@ -1,4 +1,5 @@
-﻿using Terminal.Gui;
+﻿using Revolt.Cli.Views.Windows;
+using Terminal.Gui;
 using TextCopy;
 
 namespace Revolt.Cli.Views
@@ -15,27 +16,30 @@ namespace Revolt.Cli.Views
 
             Width = 20;
             Height = 6;
-            var copyIdButton = new Button(0, 0, "Copy _Id");
+            var currentY = 0;
+            var showProfileButton = new Button(0, currentY++, "Show _Profile");
+            showProfileButton.Clicked += () => { new UserProfileWindow(message.Author).Show(); };
+            var copyIdButton = new Button(0, currentY++, "Copy _Id");
             copyIdButton.Clicked += () =>
             {
                 ClipboardService.SetText(message._id);
                 Close();
             };
-            var copyTextButton = new Button(0, 1, "Copy _Text");
+            var copyTextButton = new Button(0, currentY++, "Copy _Text");
             copyTextButton.Clicked += () =>
             {
                 ClipboardService.SetText(message.Content);
                 Close();
             };
-            var copyUserIdButton = new Button(0, 2, "Copy _User Id");
+            var copyUserIdButton = new Button(0, currentY++, "Copy _User Id");
             copyUserIdButton.Clicked += () =>
             {
                 ClipboardService.SetText(message.AuthorId);
                 Close();
             };
-            var closeButton = new Button(0, 3, "_Close");
+            var closeButton = new Button(0, currentY++, "_Close");
             closeButton.Clicked += Close;
-            Add(copyIdButton, copyTextButton, copyUserIdButton, closeButton);
+            Add(showProfileButton, copyIdButton, copyTextButton, copyUserIdButton, closeButton);
         }
     }
 }

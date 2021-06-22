@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
 using Terminal.Gui;
 using SysCon = System.Console;
@@ -26,7 +28,7 @@ namespace Revolt.Cli
 
         public static void Show(this Window window, bool hideLast = true, bool sizeFix = true, View parent = null)
         {
-            if(sizeFix)
+            if (sizeFix)
                 window.SizeFix(App.Toplevel);
             Show((View)window, hideLast, parent);
         }
@@ -41,5 +43,17 @@ namespace Revolt.Cli
 
         public static void Hide(this View view)
             => App.Toplevel.Remove(view);
+
+        public static int GetLongest(this IEnumerable<Label> labels)
+        {
+            var res = 0;
+            foreach (var label in labels)
+            {
+                if (label.Text.Length > res)
+                    res = label.Text.Length;
+            }
+
+            return res;
+        }
     }
 }
