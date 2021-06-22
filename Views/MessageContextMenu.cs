@@ -7,17 +7,35 @@ namespace Revolt.Cli.Views
     {
         public MessageContextMenu(Message message)
         {
-            Width = 20;
-            Height = 5;
-            var copyIdButton = new Button(0, 0, "Copy Id");
-            copyIdButton.Clicked += () => { ClipboardService.SetText(message._id); };
-            var copyTextButton = new Button(0, 1, "Copy Text");
-            copyTextButton.Clicked += () => { ClipboardService.SetText(message.Content); };
-            var closeButton = new Button(0, 2,"Close");
-            closeButton.Clicked += () => { this.SuperView.Remove(this);
+            void Close()
+            {
+                this.SuperView.Remove(this);
                 this.FocusPrev();
+            }
+
+            Width = 20;
+            Height = 6;
+            var copyIdButton = new Button(0, 0, "Copy _Id");
+            copyIdButton.Clicked += () =>
+            {
+                ClipboardService.SetText(message._id);
+                Close();
             };
-            Add(copyIdButton, copyTextButton, closeButton);
+            var copyTextButton = new Button(0, 1, "Copy _Text");
+            copyTextButton.Clicked += () =>
+            {
+                ClipboardService.SetText(message.Content);
+                Close();
+            };
+            var copyUserIdButton = new Button(0, 2, "Copy _User Id");
+            copyUserIdButton.Clicked += () =>
+            {
+                ClipboardService.SetText(message.AuthorId);
+                Close();
+            };
+            var closeButton = new Button(0, 3, "_Close");
+            closeButton.Clicked += Close;
+            Add(copyIdButton, copyTextButton, copyUserIdButton, closeButton);
         }
     }
 }
