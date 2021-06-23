@@ -44,13 +44,13 @@ namespace Revolt.Cli
         public static void Hide(this View view)
             => App.Toplevel.Remove(view);
 
-        public static int GetLongest(this IEnumerable<Label> labels)
+        public static int GetLongest(this IEnumerable<View> views)
         {
             var res = 0;
-            foreach (var label in labels)
+            foreach (var view in views)
             {
-                if (label.Text.Length > res)
-                    res = label.Text.Length;
+                if (view.Text.Length > res)
+                    res = view.Text.Length;
             }
 
             return res;

@@ -39,7 +39,7 @@ namespace Revolt.Cli.Views.Windows
                 };
                 userButton.Clicked += () =>
                 {
-                    new MessageContextMenu(message)
+                    new MessageContextMenu(message, this)
                     {
                         Y = Pos.Bottom(userButton),
                         X = userButton.X

@@ -6,7 +6,7 @@ namespace Revolt.Cli.Views
 {
     public class MessageContextMenu : Window
     {
-        public MessageContextMenu(Message message)
+        public MessageContextMenu(Message message, Window aboveParent)
         {
             void Close()
             {
@@ -15,10 +15,14 @@ namespace Revolt.Cli.Views
             }
 
             Width = 20;
-            Height = 6;
+            Height = 7;
             var currentY = 0;
             var showProfileButton = new Button(0, currentY++, "Show _Profile");
-            showProfileButton.Clicked += () => { new UserProfileWindow(message.Author).Show(); };
+            showProfileButton.Clicked += () =>
+            {
+                new UserProfileWindow(message.Author).Show();
+                aboveParent.Hide();
+            };
             var copyIdButton = new Button(0, currentY++, "Copy _Id");
             copyIdButton.Clicked += () =>
             {
