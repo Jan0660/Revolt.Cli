@@ -128,8 +128,15 @@ Source: https://github.com/Jan0660/Revolt.Cli", "Ok");
                             var children = new List<MenuItem>();
                             foreach (var channelId in server.ChannelIds)
                             {
-                                var channel = (TextChannel)App.Client.ChannelsCache.First(c => c._id == channelId);
-                                children.Add(new(channel.Name, "", () => new ChannelWindow(channel).Show()));
+                                try
+                                {
+                                    var channel = (TextChannel)App.Client.ChannelsCache.First(c => c._id == channelId);
+                                    children.Add(new(channel.Name, "", () => new ChannelWindow(channel).Show()));
+                                }
+                                catch
+                                {
+                                    // voice channels crash this :zany_face:
+                                }
                             }
 
                             var menu = new MenuBarItem(server.Name, server.Description?.Shorten(30) ?? "", null)

@@ -17,7 +17,7 @@ namespace Revolt.Cli.Views
             Width = 20;
             Height = 7;
             var currentY = 0;
-            var showProfileButton = new Button(0, currentY++, "Show _Profile");
+            var showProfileButton = new Button(0, currentY++, "View _Profile");
             showProfileButton.Clicked += () =>
             {
                 new UserProfileWindow(message.Author).Show();
